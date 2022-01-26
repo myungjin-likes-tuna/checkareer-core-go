@@ -16,5 +16,5 @@ jobs:
           node-version: 15
       - name: Show current changelog
         run: |
-          npm ci
+          yarn
           make current_changelog
