@@ -17,7 +17,10 @@ var TestModules = fx.Options(
 )
 
 func TestCreateCyper(t *testing.T) {
-	f := func(generator dbms.Neo4jSessionGenerator) {
+	f := func(settings *config.Settings, generator dbms.Neo4jSessionGenerator) {
+		if _, exist := settings.Extras["CI"]; exist {
+			return
+		}
 		session := generator()
 		defer session.Close()
 		result, err := session.WriteTransaction(createItem)
