@@ -40,5 +40,6 @@
     ]
   },
   "go.testEnvFile": "${workspaceFolder}/.env",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "files.insertFinalNewline": true
 }
