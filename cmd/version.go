@@ -1,4 +1,4 @@
 package cmd
 
 //Version of the application
-var Version = "22.0.0"
+var Version = "22.1.0"
