@@ -1,16 +1,13 @@
-package dbms_test
+package _neo4j
 
 import (
-	"checkareer-core/_test"
 	"checkareer-core/config"
 	"checkareer-core/dbms"
 	"context"
 	"fmt"
 	"log"
-	"testing"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.uber.org/fx"
@@ -33,6 +30,7 @@ func registerHook(
 	})
 }
 
+// NewNeo4jTestContainer for neo4j test
 func NewNeo4jTestContainer(settings *config.Settings) testcontainers.Container {
 	ctx := context.Background()
 	container, err := startContainer(ctx, settings.Neo4j.Username, settings.Neo4j.Password)
@@ -65,6 +63,7 @@ func startContainer(
 	})
 }
 
+// NewSettings constructor
 func NewSettings() *config.Settings {
 	var settings config.Settings
 	settings.Neo4j.URI = ""
@@ -73,6 +72,7 @@ func NewSettings() *config.Settings {
 	return &settings
 }
 
+// TestModules of neo4j
 var TestModules = fx.Options(
 	fx.Provide(
 		dbms.NewNeo4jDriver,
@@ -82,41 +82,3 @@ var TestModules = fx.Options(
 	),
 	fx.Invoke(registerHook),
 )
-
-func TestCreateCyper(t *testing.T) {
-	f := func(settings *config.Settings, generator dbms.Neo4jSessionGenerator) {
-		session := generator()
-		defer session.Close()
-		result, err := session.WriteTransaction(createItem)
-		assert.NoError(t, err)
-		assert.NotNil(t, result)
-	}
-	app := _test.NewForTest(t, TestModules, fx.Invoke(f))
-	app.RequireStart()
-}
-
-func createItem(tx neo4j.Transaction) (interface{}, error) {
-	records, err := tx.Run(
-		"MERGE (n: Item {id: $id, name: $name}) RETURN n.id, n.name",
-		map[string]interface{}{
-			"id": 1, "name": "Item 1",
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	record, err := records.Single()
-	if err != nil {
-		return nil, err
-	}
-	return &Item{
-		ID:   record.Values[0].(int64),
-		Name: record.Values[1].(string),
-	}, nil
-}
-
-// Item
-type Item struct {
-	ID   int64
-	Name string
-}

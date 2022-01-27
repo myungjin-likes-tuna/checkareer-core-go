@@ -13,7 +13,7 @@
   "go.lintOnSave": "file",
   "go.vetOnSave": "package",
   "go.coverOnSave": false,
-  "go.testOnSave": true,
+  "go.testOnSave": false,
   "go.useCodeSnippetsOnFunctionSuggest": false,
   "go.buildTags": "",
   "go.buildFlags": [],
