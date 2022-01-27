@@ -1,0 +1,19 @@
+# mac
+.DS_Store
+
+# dependency
+vendor
+
+# project manage dependency
+node_modules
+
+# directory
+build
+bin
+.public
+
+# coverage
+coverage.xml
+
+# sqlite
+*.db
