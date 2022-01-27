@@ -12,7 +12,7 @@ type (
 )
 
 // NewDeleter is constructor
-func NewDeleter(repository Repository) Deleter {
+func NewDeleter(repository *Repository) Deleter {
 	return repository
 }
 

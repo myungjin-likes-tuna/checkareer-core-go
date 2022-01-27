@@ -12,7 +12,7 @@ type (
 )
 
 // NewReader is constructor
-func NewReader(repository Repository) Reader {
+func NewReader(repository *Repository) Reader {
 	return repository
 }
 

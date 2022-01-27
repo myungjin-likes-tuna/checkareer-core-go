@@ -12,7 +12,7 @@ type (
 )
 
 // NewUpdater is constructor
-func NewUpdater(repository Repository) Updater {
+func NewUpdater(repository *Repository) Updater {
 	return repository
 }
 
