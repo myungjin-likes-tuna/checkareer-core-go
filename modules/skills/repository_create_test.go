@@ -18,7 +18,7 @@ var TestModules = fx.Options(
 
 func TestCreater(t *testing.T) {
 	f := func(creater skills.Creater) {
-		node, err := creater.Create(skills.WithID(1), skills.WithName("golang"))
+		node, err := creater.Create(1, skills.WithName("golang"))
 		assert.NoError(t, err)
 		assert.NotZero(t, node)
 	}
