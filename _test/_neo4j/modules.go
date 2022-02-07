@@ -16,16 +16,26 @@ import (
 // registerHook invoke로 호출되므로 파라미터의 순서가 초기화의 순서
 func registerHook(
 	lifecycle fx.Lifecycle,
-	neo4jContainer testcontainers.Container,
+	settings *config.Settings,
 	driver neo4j.Driver,
 ) {
+	var neo4jContainer testcontainers.Container
 	lifecycle.Append(fx.Hook{
+		OnStart: func(context context.Context) error {
+			if settings.CI {
+				neo4jContainer = NewNeo4jTestContainer(settings)
+			}
+			return nil
+		},
 		OnStop: func(context context.Context) error {
 			err := driver.Close()
 			if err != nil {
 				fmt.Println(err)
 			}
-			return neo4jContainer.Terminate(context)
+			if settings.CI {
+				return neo4jContainer.Terminate(context)
+			}
+			return err
 		},
 	})
 }
@@ -66,9 +76,11 @@ func startContainer(
 // NewSettings constructor
 func NewSettings() *config.Settings {
 	var settings config.Settings
-	settings.Neo4j.URI = ""
-	settings.Neo4j.Username = "neo4j"
-	settings.Neo4j.Password = "t2st2r"
+	settings.Neo4j.URI = "neo4j://localhost:7687"
+	if settings.CI {
+		settings.Neo4j.Username = "neo4j"
+		settings.Neo4j.Password = "t2st2r"
+	}
 	return &settings
 }
 
