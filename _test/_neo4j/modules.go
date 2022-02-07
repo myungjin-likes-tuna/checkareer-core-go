@@ -17,16 +17,10 @@ import (
 func registerHook(
 	lifecycle fx.Lifecycle,
 	settings *config.Settings,
+	neo4jContainer testcontainers.Container,
 	driver neo4j.Driver,
 ) {
-	var neo4jContainer testcontainers.Container
 	lifecycle.Append(fx.Hook{
-		OnStart: func(context context.Context) error {
-			if settings.CI {
-				neo4jContainer = NewNeo4jTestContainer(settings)
-			}
-			return nil
-		},
 		OnStop: func(context context.Context) error {
 			err := driver.Close()
 			if err != nil {
@@ -42,6 +36,9 @@ func registerHook(
 
 // NewNeo4jTestContainer for neo4j test
 func NewNeo4jTestContainer(settings *config.Settings) testcontainers.Container {
+	if !settings.CI {
+		return nil
+	}
 	ctx := context.Background()
 	container, err := startContainer(ctx, settings.Neo4j.Username, settings.Neo4j.Password)
 	if err != nil {
@@ -75,13 +72,13 @@ func startContainer(
 
 // NewSettings constructor
 func NewSettings() *config.Settings {
-	var settings config.Settings
-	settings.Neo4j.URI = "neo4j://localhost:7687"
+	settings := config.NewSettings()
+
 	if settings.CI {
 		settings.Neo4j.Username = "neo4j"
 		settings.Neo4j.Password = "t2st2r"
 	}
-	return &settings
+	return settings
 }
 
 // TestModules of neo4j

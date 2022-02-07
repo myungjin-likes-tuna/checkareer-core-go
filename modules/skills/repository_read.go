@@ -51,7 +51,7 @@ func (repo Repository) Read(options ...ReadOption) (node Node, err error) {
 		err = session.Close()
 	}()
 	result, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		query := "MATCH (n:Node {id: $id}) RETURN n.id as id, n.name as name"
+		query := "MATCH (n:Skill) WHERE id(n) = $id RETURN id(n) as id, n.name as name"
 		parameters := map[string]interface{}{
 			"id": opts.ID,
 		}

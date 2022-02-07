@@ -5,7 +5,7 @@ import "github.com/neo4j/neo4j-go-driver/v4/neo4j"
 type (
 	// Creater of skills
 	Creater interface {
-		Create(id int64, opts ...CreateOption) (node Node, err error)
+		Create(opts ...CreateOption) (node Node, err error)
 	}
 	// CreateOptions of skills
 	CreateOptions struct {
@@ -37,23 +37,40 @@ func NewCreater(repository *Repository) Creater {
 }
 
 // Create of skills
-func (repo Repository) Create(id int64, options ...CreateOption) (node Node, err error) {
+func (repo Repository) Create(options ...CreateOption) (node Node, err error) {
 	opts := NewCreateOptions(options...)
 	session := repo.Neo4jSessionGenerator()
 	defer func() {
-		err = session.Close()
+		if _err := session.Close(); _err != nil {
+			err = _err
+		}
 	}()
 
-	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		query := "CREATE (:Node {id: $id, name: $name})"
+	result, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+		query := "CREATE (skill: Skill{name: $name}) RETURN id(skill) as id, skill.name as name"
 		parameters := map[string]interface{}{
-			"id":   id,
 			"name": opts.Name,
 		}
-		return tx.Run(query, parameters)
+		result, err := tx.Run(query, parameters)
+		if err != nil {
+			return nil, err
+		}
+		record, err := result.Single()
+		if err != nil {
+			return nil, err
+		}
+		id, exist := record.Get("id")
+		if !exist {
+			return nil, ErrNotFound
+		}
+		name, exist := record.Get("name")
+		if err != nil {
+			return nil, ErrNotFound
+		}
+		return Node{ID: id.(int64), Name: name.(string)}, nil
 	})
 	if err != nil {
 		return Node{}, err
 	}
-	return Node{ID: id, Name: opts.Name}, nil
+	return result.(Node), nil
 }

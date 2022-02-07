@@ -18,17 +18,16 @@ var TestModules = fx.Options(
 )
 
 func TestRepository(t *testing.T) {
-	create := func(creater skills.Creater) {
-		node, err := creater.Create(1, skills.WithName("golang"))
+	f := func(creater skills.Creater, reader skills.Reader) {
+		skill, err := creater.Create(skills.WithName("golang"))
 		assert.NoError(t, err)
-		assert.NotZero(t, node)
-	}
-	read := func(reader skills.Reader) {
-		node, err := reader.Read(skills.WithID(1))
+		assert.NotZero(t, skill)
+
+		_skill, err := reader.Read(skills.WithID(skill.ID))
 		assert.NoError(t, err)
-		assert.NotZero(t, node)
+		assert.NotZero(t, _skill)
 	}
 
-	app := _test.NewForTest(t, TestModules, fx.Invoke(create, read))
+	app := _test.NewForTest(t, TestModules, fx.Invoke(f))
 	app.RequireStart()
 }
