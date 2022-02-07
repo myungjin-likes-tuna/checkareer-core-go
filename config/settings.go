@@ -15,6 +15,7 @@ type Settings struct {
 		Username string `env:"NEO4J_USERNAME" json:"username"`
 		Password string `env:"NEO4J_PASSWORD" json:"password"`
 	} `json:"neo4j"`
+	CI     bool       `json:"ci"    env:"CI"`
 	Extras env.EnvSet `json:"-"`
 }
 

@@ -14,14 +14,21 @@ var TestModules = fx.Options(
 	_neo4j.TestModules,
 	fx.Provide(skills.NewRepository),
 	fx.Provide(skills.NewCreater),
+	fx.Provide(skills.NewReader),
 )
 
-func TestCreater(t *testing.T) {
-	f := func(creater skills.Creater) {
+func TestRepository(t *testing.T) {
+	create := func(creater skills.Creater) {
 		node, err := creater.Create(1, skills.WithName("golang"))
 		assert.NoError(t, err)
 		assert.NotZero(t, node)
 	}
-	app := _test.NewForTest(t, TestModules, fx.Invoke(f))
+	read := func(reader skills.Reader) {
+		node, err := reader.Read(skills.WithID(1))
+		assert.NoError(t, err)
+		assert.NotZero(t, node)
+	}
+
+	app := _test.NewForTest(t, TestModules, fx.Invoke(create, read))
 	app.RequireStart()
 }

@@ -5,7 +5,7 @@ import "github.com/neo4j/neo4j-go-driver/v4/neo4j"
 type (
 	// Creater of skills
 	Creater interface {
-		Create(id uint64, opts ...CreateOption) (node Node, err error)
+		Create(id int64, opts ...CreateOption) (node Node, err error)
 	}
 	// CreateOptions of skills
 	CreateOptions struct {
@@ -37,7 +37,7 @@ func NewCreater(repository *Repository) Creater {
 }
 
 // Create of skills
-func (repo Repository) Create(id uint64, options ...CreateOption) (node Node, err error) {
+func (repo Repository) Create(id int64, options ...CreateOption) (node Node, err error) {
 	opts := NewCreateOptions(options...)
 	session := repo.Neo4jSessionGenerator()
 	defer func() {
