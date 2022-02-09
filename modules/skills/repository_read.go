@@ -9,11 +9,12 @@ import (
 type (
 	// Reader of skills
 	Reader interface {
-		Read(options ...ReadOption) (node Node, err error)
+		Read(options ...ReadOption) (nodes []Node, err error)
 	}
 	// ReadOptions of skills
 	ReadOptions struct {
-		ID int64
+		ID    int64
+		Limit uint
 	}
 	// ReadOption of skills
 	ReadOption func(*ReadOptions)
@@ -35,6 +36,13 @@ func WithID(id int64) ReadOption {
 	}
 }
 
+// WithLimit is limit option
+func WithLimit(limit uint) ReadOption {
+	return func(opts *ReadOptions) {
+		opts.Limit = limit
+	}
+}
+
 // NewReader is constructor
 func NewReader(repository *Repository) Reader {
 	return repository
@@ -44,38 +52,49 @@ func NewReader(repository *Repository) Reader {
 var ErrNotFound = errors.New("not found")
 
 // Read of skills
-func (repo Repository) Read(options ...ReadOption) (node Node, err error) {
+func (repo Repository) Read(options ...ReadOption) (nodes []Node, err error) {
 	opts := NewReadOptions(options...)
 	session := repo.Neo4jSessionGenerator()
 	defer func() {
 		err = session.Close()
 	}()
 	result, err := session.ReadTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		query := "MATCH (n:Skill) WHERE id(n) = $id RETURN id(n) as id, n.name as name"
-		parameters := map[string]interface{}{
-			"id": opts.ID,
+		parameters := map[string]interface{}{}
+		query := "MATCH (n:Skill) "
+		if opts.ID != 0 {
+			query += "WHERE id(n) = $id "
+			parameters["id"] = opts.ID
+		}
+		query += "RETURN id(n) as id, n.name as name "
+		if opts.Limit != 0 {
+			query += "LIMIT $limit"
+			parameters["limit"] = opts.Limit
 		}
 		result, err := tx.Run(query, parameters)
 		if err != nil {
 			return nil, err
 		}
-		record, err := result.Single()
+		records, err := result.Collect()
 		if err != nil {
 			return nil, err
 		}
-		id, exist := record.Get("id")
-		if !exist {
-			return nil, ErrNotFound
+		nodes = make([]Node, len(records))
+		for i, record := range records {
+			id, exist := record.Get("id")
+			if !exist {
+				return nil, ErrNotFound
+			}
+			name, exist := record.Get("name")
+			if err != nil {
+				return nil, ErrNotFound
+			}
+			nodes[i] = Node{ID: id.(int64), Name: name.(string)}
 		}
-		name, exist := record.Get("name")
-		if err != nil {
-			return nil, ErrNotFound
-		}
-		return Node{ID: id.(int64), Name: name.(string)}, nil
+		return nodes, nil
 	})
 	if err != nil {
-		return Node{}, err
+		return nodes, err
 	}
 
-	return result.(Node), nil
+	return result.([]Node), nil
 }
