@@ -13,14 +13,18 @@
   "go.lintOnSave": "file",
   "go.vetOnSave": "package",
   "go.coverOnSave": false,
-  "go.testOnSave": true,
+  "go.testOnSave": false,
   "go.useCodeSnippetsOnFunctionSuggest": false,
   "go.buildTags": "",
   "go.buildFlags": [],
   "go.lintFlags": [],
   "go.vetFlags": [],
-  "go.gopath": "~/projects/go",
-  "go.goroot": "/usr/local/go",
+  // WSL
+  // "go.gopath": "~/projects/go",
+  // "go.goroot": "/usr/local/go",
+  // MAC
+  "go.gopath": "/Users/deo/projects/go",
+  "go.goroot": "/Users/deo/go",
   "go.testTimeout": "30s",
   // GOPATH는 프로젝트를 주로 사용하는 경로
   // GOROOT는 go가 설치된 경로

@@ -19,9 +19,12 @@ ref:
 	@/bin/sh -c 'echo "${GREEN}[library를 vendor에 설치합니다.]${NC}"'
 	@go mod tidy
 	@go mod vendor
+.PHONY: ref
+
+ref-graph:
 	@/bin/sh -c 'echo "${GREEN}[그래프 확인]${NC}"'
 	@go mod graph
-.PHONY: ref
+.PHONY: ref-graph
 
 # 코딩 스타일 분석
 # https://github.com/golang/lint
